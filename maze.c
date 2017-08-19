@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <locale.h>
 #include <curses.h>
+#include <signal.h>
 
 char *mazeImmutable =
 "#########\n"
@@ -32,6 +33,8 @@ char *maze = NULL;
 #define EXITLEFT (!(posx <= 0) && (posy*(mazeWidth+1)+posx)-1 == exitpos)
 #define EXITRIGHT (!(posx >= mazeWidth-1) && (posy*(mazeWidth+1)+posx)+1 == exitpos)
 
+int cols = 0, lines = 0;
+int drawOffsetX = 0, drawOffsetY = 0;
 int posx = 0, posy = 0, rotation = 1;
 int mazeWidth = 0, mazeHeight = 0;
 int startpos = 0, exitpos = 0;
@@ -201,12 +204,42 @@ void findWalls (void) {
 	}
 }
 
+void handleWinch (int signal) {
+	cols = COLS;
+	lines = LINES;
+	if (cols > lines*2) {
+		drawOffsetX = (cols - lines*2)/2;
+		cols = lines*2;
+	} else if (lines > cols*2) {
+		drawOffsetY = (lines - cols*2)/2;
+		lines = cols*2;
+	}
+	// fprintf(stderr, "\a");
+}
+
 int main (int argc, char **argv) {
 	// printf("maze len: %lu\n", strlen(mazeImmutable));
 	
-	maze = malloc((strlen(mazeImmutable)+1)*sizeof(char *));
-	for (int i = 0; i <= strlen(mazeImmutable); i++) {
-		maze[i] = mazeImmutable[i];
+	if (argc > 1) {
+		char *fpath = argv[1];
+		FILE *fp = fopen(fpath, "r");
+		if (!fp) {
+			fprintf(stderr, "maze: can't open file '%s': %s", fpath, strerror(errno));
+			return 1;
+		}
+		
+		maze = malloc(4096 * sizeof(int));
+		int c;
+		int i;
+		for (i = 0; i < 4096 && (c = getc(fp)) != EOF; i++) {
+			maze[i] = (char)c;
+		}
+		maze[i] = '\0';
+	} else {
+		maze = malloc((strlen(mazeImmutable)+1)*sizeof(char *));
+		for (int i = 0; i <= strlen(mazeImmutable); i++) {
+			maze[i] = mazeImmutable[i];
+		}
 	}
 	
 	setlocale(LC_ALL, "");
@@ -224,7 +257,7 @@ int main (int argc, char **argv) {
 	
 	refresh();
 	
-	int cols = COLS, lines = LINES, drawOffsetX = 0, drawOffsetY = 0;
+	cols = COLS; lines = LINES;
 	if (cols > lines*2) {
 		drawOffsetX = (cols - lines*2)/2;
 		cols = lines*2;
@@ -232,6 +265,8 @@ int main (int argc, char **argv) {
 		drawOffsetY = (lines - cols*2)/2;
 		lines = cols*2;
 	}
+	
+	bsd_signal(SIGWINCH, handleWinch);
 	
 	// endwin(); // for testing
 	// printf("%s\n", mazeImmutable);
@@ -394,7 +429,8 @@ int main (int argc, char **argv) {
 				insetlevel++;
 				recursinset += inset;
 				advance();
-			} while (!wallF);
+			} while (!wallF && recursinset < (lines/2));
+			
 			posx = oldposx;
 			posy = oldposy;
 			// move(lines-1, cols-8);
