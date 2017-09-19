@@ -335,10 +335,16 @@ int main (int argc, char **argv) {
 				
 				if (wallL || exitL) {
 					for (int i = 0; i < inset; i++) {
+						if (drawOffsetY + recursinset+i >= LINES/2-1) {
+							break;
+						}
 						move(drawOffsetY + recursinset+i, drawOffsetX + recursinset+i);
 						printw("\\");
 					}
 					for (int i = 0; i < inset; i++) {
+						if (drawOffsetY + lines-1-recursinset-i <= LINES/2) {
+							break;
+						}
 						move(drawOffsetY + lines-1-recursinset-i, drawOffsetX + recursinset+i);
 						printw("/");
 					}
@@ -352,6 +358,9 @@ int main (int argc, char **argv) {
 					}
 				} else {
 					for (int i = 1; i < inset; i++) {
+						if (drawOffsetY + recursinset+i >= LINES/2-1) {
+							break;
+						}
 						move(drawOffsetY + recursinset+inset, drawOffsetX + recursinset+i);
 						printw("-");
 						move(drawOffsetY + lines-1-recursinset-inset, drawOffsetX + recursinset+i);
@@ -364,10 +373,16 @@ int main (int argc, char **argv) {
 				}
 				if (wallR || exitR) {
 					for (int i = 0; i < inset; i++) {
+						if (drawOffsetY + recursinset+i >= LINES/2-1) {
+							break;
+						}
 						move(drawOffsetY + recursinset+i, drawOffsetX + cols-1-recursinset-i);
 						printw("/");
 					}
 					for (int i = 0; i < inset; i++) {
+						if (drawOffsetY + lines-1-recursinset-i <= LINES/2) {
+							break;
+						}
 						move(drawOffsetY + lines-1-recursinset-i, drawOffsetX + cols-1-recursinset-i);
 						printw("\\");
 					}
@@ -381,6 +396,9 @@ int main (int argc, char **argv) {
 					}
 				} else {
 					for (int i = 1; i < inset; i++) {
+						if (drawOffsetY + recursinset+i >= LINES/2-1) {
+							break;
+						}
 						move(drawOffsetY + recursinset+inset, drawOffsetX + cols-1-recursinset-i);
 						printw("-");
 						move(drawOffsetY + lines-1-recursinset-inset, drawOffsetX + cols-1-recursinset-i);
@@ -400,6 +418,9 @@ int main (int argc, char **argv) {
 						iend = cols-1-recursinset;
 					}
 					for (int i = istart; i < iend; i++) {
+						if (drawOffsetY + recursinset+inset >= LINES/2-1) {
+							break;
+						}
 						move(drawOffsetY + recursinset+inset, drawOffsetX + i);
 						printw("-");
 						move(drawOffsetY + lines-1-recursinset-inset, drawOffsetX + i);
