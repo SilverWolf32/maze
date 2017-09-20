@@ -12,6 +12,7 @@
 #include <locale.h>
 #include <curses.h>
 #include <signal.h>
+#include <unistd.h>
 
 char *mazeImmutable =
 "#########\n"
@@ -562,6 +563,30 @@ int main (int argc, char **argv) {
 			case 's':
 				retreat();
 				break;
+			case '?':
+				move(LINES-mazeHeight, 0);
+				int ix = 0, iy = 0;
+				for (int i = 0; i < strlen(maze); i++) {
+					move(LINES-mazeHeight+iy, ix);
+					// int absPos = posy*(mazeWidth+1) + posx;
+					if (i == absPos) {
+						printw("*");
+					} else if (i == startpos) {
+						printw("[");
+					} else if (i == exitpos) {
+						printw("]");
+					} else {
+						if (maze[i] == '\n') {
+							iy++;
+							ix = -1;
+						} else {
+							printw("%c", maze[i]);
+						}
+					}
+					ix++;
+				}
+				refresh();
+				sleep(1);
 		}
 	}
 	
