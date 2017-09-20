@@ -40,9 +40,10 @@ int posx = 0, posy = 0, rotation = 1;
 int mazeWidth = 0, mazeHeight = 0;
 int startpos = 0, exitpos = 0;
 bool wallL = 0, wallF = 0, wallR = 0, wallB = 0, exitL = 0, exitF = 0, exitR = 0;
+bool wallFL = 0, wallFR = 0; // forward and left/right
 
-void advance (void) {
-	if (wallF) {
+void advance (bool override) {
+	if (wallF && !override) {
 		return;
 	}
 	switch (rotation) {
@@ -74,8 +75,8 @@ void advance (void) {
 		posy = mazeHeight-1;
 	}
 }
-void retreat (void) {
-	if (wallB) {
+void retreat (bool override) {
+	if (wallB && !override) {
 		return;
 	}
 	switch (rotation) {
@@ -106,103 +107,156 @@ void retreat (void) {
 	if (posy > mazeHeight-1) {
 		posy = mazeHeight-1;
 	}
+}
+void _findWalls (int iter) {
+	int absPos = posy*(mazeWidth+1) + posx;
+	int oldposx = posx, oldposy = posy;
+	switch (iter) {
+		case 0:
+			switch (rotation) {
+				case 0: // facing up
+					if (WALLLEFT) {
+						wallL = 1;
+					}
+					if (WALLUP) {
+						wallF = 1;
+					}
+					if (WALLRIGHT) {
+						wallR = 1;
+					}
+					if (WALLDOWN) {
+						wallB = 1;
+					}
+					if (EXITLEFT) {
+						exitL = 1;
+					}
+					if (EXITUP) {
+						exitF = 1;
+					}
+					if (EXITRIGHT) {
+						exitR = 1;
+					}
+					break;
+				case 1: // facing right
+					if (WALLUP) {
+						wallL = 1;
+					}
+					if (WALLRIGHT) {
+						wallF = 1;
+					}
+					if (WALLDOWN) {
+						wallR = 1;
+					}
+					if (WALLLEFT) {
+						wallB = 1;
+					}
+					if (EXITUP) {
+						exitL = 1;
+					}
+					if (EXITRIGHT) {
+						exitF = 1;
+					}
+					if (EXITDOWN) {
+						exitR = 1;
+					}
+					break;
+				case 2: // facing down
+					if (WALLRIGHT) {
+						wallL = 1;
+					}
+					if (WALLDOWN) {
+						wallF = 1;
+					}
+					if (WALLLEFT) {
+						wallR = 1;
+					}
+					if (WALLUP) {
+						wallB = 1;
+					}
+					if (EXITRIGHT) {
+						exitL = 1;
+					}
+					if (EXITDOWN) {
+						exitF = 1;
+					}
+					if (EXITLEFT) {
+						exitR = 1;
+					}
+					break;
+				case 3: // facing left
+					if (WALLDOWN) {
+						wallL = 1;
+					}
+					if (WALLLEFT) {
+						wallF = 1;
+					}
+					if (WALLUP) {
+						wallR = 1;
+					}
+					if (WALLRIGHT) {
+						wallB = 1;
+					}
+					if (EXITDOWN) {
+						exitL = 1;
+					}
+					if (EXITLEFT) {
+						exitF = 1;
+					}
+					if (EXITUP) {
+						exitR = 1;
+					}
+					break;
+			}
+			break;
+		case 1:
+			switch (rotation) {
+				case 0: // facing up
+					if (WALLLEFT) {
+						wallFL = 1;
+					}
+					if (WALLRIGHT) {
+						wallFR = 1;
+					}
+					break;
+				case 1: // facing right
+					if (WALLUP) {
+						wallFL = 1;
+					}
+					if (WALLDOWN) {
+						wallFR = 1;
+					}
+					break;
+				case 2: // facing down
+					if (WALLRIGHT) {
+						wallFL = 1;
+					}
+					if (WALLLEFT) {
+						wallFR = 1;
+					}
+					break;
+				case 3: // facing left
+					if (WALLDOWN) {
+						wallFL = 1;
+					}
+					if (WALLUP) {
+						wallFR = 1;
+					}
+					break;
+			}
+			break;
+		default:
+			break;
+	}
+	
+	if (iter == 0) {
+		advance(1);
+		_findWalls(++iter);
+	}
+	posx = oldposx;
+	posy = oldposy;
 }
 void findWalls (void) {
-	int absPos = posy*(mazeWidth+1) + posx;
-	switch (rotation) {
-		case 0: // facing up
-			if (WALLLEFT) {
-				wallL = 1;
-			}
-			if (WALLUP) {
-				wallF = 1;
-			}
-			if (WALLRIGHT) {
-				wallR = 1;
-			}
-			if (WALLDOWN) {
-				wallB = 1;
-			}
-			if (EXITLEFT) {
-				exitL = 1;
-			}
-			if (EXITUP) {
-				exitF = 1;
-			}
-			if (EXITRIGHT) {
-				exitR = 1;
-			}
-			break;
-		case 1: // facing right
-			if (WALLUP) {
-				wallL = 1;
-			}
-			if (WALLRIGHT) {
-				wallF = 1;
-			}
-			if (WALLDOWN) {
-				wallR = 1;
-			}
-			if (WALLLEFT) {
-				wallB = 1;
-			}
-			if (EXITUP) {
-				exitL = 1;
-			}
-			if (EXITRIGHT) {
-				exitF = 1;
-			}
-			if (EXITDOWN) {
-				exitR = 1;
-			}
-			break;
-		case 2: // facing down
-			if (WALLRIGHT) {
-				wallL = 1;
-			}
-			if (WALLDOWN) {
-				wallF = 1;
-			}
-			if (WALLLEFT) {
-				wallR = 1;
-			}
-			if (WALLUP) {
-				wallB = 1;
-			}
-			if (EXITRIGHT) {
-				exitL = 1;
-			}
-			if (EXITDOWN) {
-				exitF = 1;
-			}
-			if (EXITLEFT) {
-				exitR = 1;
-			}
-			break;
-		case 3: // facing left
-			if (WALLDOWN) {
-				wallL = 1;
-			}
-			if (WALLLEFT) {
-				wallF = 1;
-			}
-			if (WALLUP) {
-				wallR = 1;
-			}
-			if (WALLRIGHT) {
-				wallB = 1;
-			}
-			if (EXITDOWN) {
-				exitL = 1;
-			}
-			if (EXITLEFT) {
-				exitF = 1;
-			}
-			if (EXITUP) {
-				exitR = 1;
-			}
-			break;
-	}
+	_findWalls(0);
 }
 
 void handleWinch (int signal) {
@@ -368,14 +422,16 @@ int main (int argc, char **argv) {
 						}
 					}
 				} else {
-					for (int i = 1; i < inset; i++) {
-						if (drawOffsetY + recursinset+i >= LINES/2-1) {
-							break;
+					if (wallFL) {
+						for (int i = 1; i < inset; i++) {
+							if (drawOffsetY + recursinset+i >= LINES/2-1) {
+								break;
+							}
+							move(drawOffsetY + recursinset+inset, drawOffsetX + recursinset+i);
+							printw("-");
+							move(drawOffsetY + lines-1-recursinset-inset, drawOffsetX + recursinset+i);
+							printw("-");
 						}
-						move(drawOffsetY + recursinset+inset, drawOffsetX + recursinset+i);
-						printw("-");
-						move(drawOffsetY + lines-1-recursinset-inset, drawOffsetX + recursinset+i);
-						printw("-");
 					}
 				}
 				for (int i = recursinset+inset; i < lines-recursinset-inset; i++) {
@@ -406,14 +462,16 @@ int main (int argc, char **argv) {
 						}
 					}
 				} else {
-					for (int i = 1; i < inset; i++) {
-						if (drawOffsetY + recursinset+i >= LINES/2-1) {
-							break;
+					if (wallFR) {
+						for (int i = 1; i < inset; i++) {
+							if (drawOffsetY + recursinset+i >= LINES/2-1) {
+								break;
+							}
+							move(drawOffsetY + recursinset+inset, drawOffsetX + cols-1-recursinset-i);
+							printw("-");
+							move(drawOffsetY + lines-1-recursinset-inset, drawOffsetX + cols-1-recursinset-i);
+							printw("-");
 						}
-						move(drawOffsetY + recursinset+inset, drawOffsetX + cols-1-recursinset-i);
-						printw("-");
-						move(drawOffsetY + lines-1-recursinset-inset, drawOffsetX + cols-1-recursinset-i);
-						printw("-");
 					}
 				}
 				for (int i = recursinset+inset; i < lines-recursinset-inset; i++) {
@@ -460,7 +518,7 @@ int main (int argc, char **argv) {
 				// printw("Handled walls at %d %d, %s%s%s", posx, posy, ((wallL)?"L":""), ((wallF)?"F":""), ((wallR)?"R":""));
 				insetlevel++;
 				recursinset += inset;
-				advance();
+				advance(0);
 			} while (!wallF && recursinset < (lines/2));
 			
 			posx = oldposx;
@@ -559,10 +617,10 @@ int main (int argc, char **argv) {
 				rotation = (rotation+1)%4;
 				break;
 			case 'w':
-				advance();
+				advance(0);
 				break;
 			case 's':
-				retreat();
+				retreat(0);
 				break;
 			case '?':
 				move(LINES-mazeHeight, 0);
