@@ -222,9 +222,14 @@ int main (int argc, char **argv) {
 	
 	if (argc > 1) {
 		char *fpath = argv[1];
-		FILE *fp = fopen(fpath, "r");
+		FILE *fp = NULL;
+		if (strcmp(fpath, "-") == 0) {
+			fp = stdin;
+		} else {
+			fp = fopen(fpath, "r");
+		}
 		if (!fp) {
-			fprintf(stderr, "maze: can't open file '%s': %s", fpath, strerror(errno));
+			fprintf(stderr, "maze: can't open file '%s': %s\n", fpath, strerror(errno));
 			return 1;
 		}
 		
@@ -235,6 +240,11 @@ int main (int argc, char **argv) {
 			maze[i] = (char)c;
 		}
 		maze[i] = '\0';
+		if (fp == stdin) {
+			freopen("/dev/tty", "r", stdin); // reopen stdin to get user input
+		} else {
+			fclose(fp);
+		}
 	} else {
 		maze = malloc((strlen(mazeImmutable)+1)*sizeof(char *));
 		for (int i = 0; i <= strlen(mazeImmutable); i++) {
