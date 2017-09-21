@@ -570,11 +570,17 @@ int main (int argc, char **argv) {
 					move(LINES-mazeHeight+iy, ix);
 					// int absPos = posy*(mazeWidth+1) + posx;
 					if (i == absPos) {
+						attron(A_REVERSE);
 						printw("*");
+						attroff(A_REVERSE);
 					} else if (i == startpos) {
+						attron(A_REVERSE);
 						printw("[");
+						attroff(A_REVERSE);
 					} else if (i == exitpos) {
+						attron(A_REVERSE);
 						printw("]");
+						attroff(A_REVERSE);
 					} else {
 						if (maze[i] == '\n') {
 							iy++;
