@@ -543,6 +543,7 @@ int main (int argc, char **argv) {
 		}
 		
 		int c = wgetch(stdscr);
+		flushinp(); // discard typeahead, prevents holding `?' from locking up program
 		switch (c) {
 			case 'q':
 				endwin();
