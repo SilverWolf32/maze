@@ -593,6 +593,10 @@ int main (int argc, char **argv) {
 				}
 				refresh();
 				sleep(1);
+				break;
+			case '':
+				refresh();
+				break;
 		}
 	}
 	
