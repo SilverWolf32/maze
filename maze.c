@@ -23,6 +23,8 @@ char *maze = NULL;
 
 #define STARTCHAR '['
 #define EXITCHAR ']'
+// in drawing, don't look at more than this many cells
+#define VIEWDEPTH 128
 
 #define WALLUP (posy <= 0 || maze[(posy-1)*(mazeWidth+1)+posx] != ' ')
 #define WALLDOWN (posy >= mazeHeight-1 || maze[(posy+1)*(mazeWidth+1)+posx] != ' ')
@@ -342,9 +344,20 @@ void handleWinch (int signal) {
 	// fprintf(stderr, "\a");
 }
 
-void _drawWalls (int iter, int horizIter) {
+int _drawWallsPointListIndex = 0;
+void _drawWalls (int iter, int horizIter, int ptList[][2]) {
 	// move(0+iter, 0);
 	// printw("[%d %d]", posx, posy);
+	
+	for (int i = 0; i < _drawWallsPointListIndex; i++) {
+		if (ptList[i][0] == posx && ptList[i][1] == posy) { // been here before
+			return;
+		}
+	}
+	
+	_drawWallsPointListIndex++;
+	ptList[_drawWallsPointListIndex][0] = posx;
+	ptList[_drawWallsPointListIndex][1] = posy;
 	
 	int inset = lines/10;
 	int recursinset = iter * inset;
@@ -367,7 +380,7 @@ void _drawWalls (int iter, int horizIter) {
 	if (!wallF && !exitF && recursinset < (lines/2)) {
 		// recursinset += inset;
 		advance(0);
-		_drawWalls(iter+1, horizIter);
+		_drawWalls(iter+1, horizIter, ptList);
 	}
 	posx = oldposx;
 	posy = oldposy;
@@ -376,7 +389,7 @@ void _drawWalls (int iter, int horizIter) {
 		// advance(0);
 		moveLeft(0);
 		// printw(" - recursing < to %d %d", posx, posy);
-		_drawWalls(iter, horizIter-1);
+		_drawWalls(iter, horizIter-1, ptList);
 	}
 	posx = oldposx;
 	posy = oldposy;
@@ -385,7 +398,7 @@ void _drawWalls (int iter, int horizIter) {
 		// advance(0);
 		moveRight(0);
 		// printw(" - recursing > to %d %d", posx, posy);
-		_drawWalls(iter, horizIter+1);
+		_drawWalls(iter, horizIter+1, ptList);
 	}
 	
 	// start of drawing
@@ -401,7 +414,7 @@ void _drawWalls (int iter, int horizIter) {
 				break;
 			}
 			int y = drawOffsetY + recursinset+i;
-			if (y >= LINES/2-1) {
+			if (y >= LINES/2) {
 				break;
 			}
 			move(y, x);
@@ -442,13 +455,16 @@ void _drawWalls (int iter, int horizIter) {
 	} else {
 		
 	}
-	for (int i = recursinset+inset; i < lines-recursinset-inset; i++) {
-		int x = drawOffsetX + recursinset+inset + horizOffset;
-		if (x < 0 || x > COLS-1) {
-			break;
+	if (wallL || wallF || exitL || exitF) {
+		// draw columns
+		for (int i = recursinset+inset; i < lines-recursinset-inset; i++) {
+			int x = drawOffsetX + recursinset+inset + horizOffset;
+			if (x < 0 || x > COLS-1) {
+				break;
+			}
+			move(drawOffsetY + i, x);
+			printw("|");
 		}
-		move(drawOffsetY + i, x);
-		printw("|");
 	}
 	if (wallR || exitR) {
 		for (int i = 0; i < inset; i++) {
@@ -457,7 +473,7 @@ void _drawWalls (int iter, int horizIter) {
 				break;
 			}
 			int y = drawOffsetY + recursinset+i;
-			if (y >= LINES/2-1) {
+			if (y >= LINES/2) {
 				break;
 			}
 			move(y, x);
@@ -500,13 +516,16 @@ void _drawWalls (int iter, int horizIter) {
 	} else {
 		
 	}
-	for (int i = recursinset+inset; i < lines-recursinset-inset; i++) {
-		int x = drawOffsetX + cols-1-recursinset-inset + horizOffset;
-		if (x < 0 || x > COLS-1) {
-			break;
+	if (wallF || wallR || exitF || exitR) {
+		// draw columns
+		for (int i = recursinset+inset; i < lines-recursinset-inset; i++) {
+			int x = drawOffsetX + cols-1-recursinset-inset + horizOffset;
+			if (x < 0 || x > COLS-1) {
+				break;
+			}
+			move(drawOffsetY + i, x);
+			printw("|");
 		}
-		move(drawOffsetY + i, x);
-		printw("|");
 	}
 	if (wallF || exitF) {
 		int istart = recursinset+inset+1, iend = cols-1-recursinset-inset;
@@ -522,7 +541,7 @@ void _drawWalls (int iter, int horizIter) {
 				continue;
 			}
 			int y = drawOffsetY + recursinset+inset;
-			if (y >= LINES/2-1) {
+			if (y >= LINES/2) {
 				break;
 			}
 			move(drawOffsetY + recursinset+inset, x);
@@ -563,7 +582,19 @@ void _drawWalls (int iter, int horizIter) {
 	refresh();
 }
 void drawWalls (void) {
-	_drawWalls(0, 0);
+	/* int **ptList = NULL;
+	ptList = malloc(VIEWDEPTH * sizeof(int *));
+	for (int i = 0; i < VIEWDEPTH; i++) {
+		ptList[i] = malloc(2 * sizeof(int));
+	} */
+	int ptList[VIEWDEPTH][2];
+	for (int i = 0; i < VIEWDEPTH; i++) {
+		ptList[i][0] = -1; // something impossible
+		ptList[i][1] = -1;
+	}
+	_drawWallsPointListIndex = 0;
+	
+	_drawWalls(0, 0, ptList);
 }
 
 int main (int argc, char **argv) {
