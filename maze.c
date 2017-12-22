@@ -726,7 +726,7 @@ int main (int argc, char **argv) {
 		} */
 		refresh();
 		
-		{
+		/* {
 			if (wallL) {
 				move(0, 0);
 				printw("X");
@@ -786,7 +786,7 @@ int main (int argc, char **argv) {
 			// move(6, 0);
 			// printw("%s", maze);
 			refresh();
-		}
+		} */
 		
 		int absPos = posy*(mazeWidth+1) + posx;
 		if (absPos == exitpos) {
