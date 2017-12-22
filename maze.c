@@ -407,7 +407,7 @@ void _drawWalls (int iter, int horizIter, int ptList[][2]) {
 	posy = oldposy;
 	findWalls();
 	
-	if (wallL || exitL) {
+	if ((wallL || exitL) && recursinset+inset < LINES/2) {
 		for (int i = 0; i < inset; i++) {
 			int x = drawOffsetX + recursinset+i + horizOffset;
 			if (x < 0 || x > COLS-1) {
@@ -466,7 +466,7 @@ void _drawWalls (int iter, int horizIter, int ptList[][2]) {
 			printw("|");
 		}
 	}
-	if (wallR || exitR) {
+	if ((wallR || exitR) && recursinset+inset < LINES/2) {
 		for (int i = 0; i < inset; i++) {
 			int x = drawOffsetX + cols-1-recursinset-i + horizOffset;
 			if (x < 0 || x > COLS-1) {
@@ -570,7 +570,6 @@ void _drawWalls (int iter, int horizIter, int ptList[][2]) {
 				}
 			}
 		}
-		wallF = 1;
 	}
 	
 	// end of drawing
