@@ -41,8 +41,9 @@ int drawOffsetX = 0, drawOffsetY = 0;
 int posx = 0, posy = 0, rotation = 1;
 int mazeWidth = 0, mazeHeight = 0;
 int startpos = 0, exitpos = 0;
+bool showCompass = 0;
+
 bool wallL = 0, wallF = 0, wallR = 0, wallB = 0, exitL = 0, exitF = 0, exitR = 0;
-bool wallFL = 0, wallFR = 0; // forward and left/right
 
 void advance (bool override) {
 	if (wallF && !override) {
@@ -176,159 +177,106 @@ void moveRight (bool override) {
 		posy = mazeHeight-1;
 	}
 }
-void _findWalls (int iter) {
-	// int absPos = posy*(mazeWidth+1) + posx;
-	int oldposx = posx, oldposy = posy;
-	// int oldRotation = rotation;
-	switch (iter) {
-		case 0:
-			switch (rotation) {
-				case 0: // facing up
-					if (WALLLEFT) {
-						wallL = 1;
-					}
-					if (WALLUP) {
-						wallF = 1;
-					}
-					if (WALLRIGHT) {
-						wallR = 1;
-					}
-					if (WALLDOWN) {
-						wallB = 1;
-					}
-					if (EXITLEFT) {
-						exitL = 1;
-					}
-					if (EXITUP) {
-						exitF = 1;
-					}
-					if (EXITRIGHT) {
-						exitR = 1;
-					}
-					break;
-				case 1: // facing right
-					if (WALLUP) {
-						wallL = 1;
-					}
-					if (WALLRIGHT) {
-						wallF = 1;
-					}
-					if (WALLDOWN) {
-						wallR = 1;
-					}
-					if (WALLLEFT) {
-						wallB = 1;
-					}
-					if (EXITUP) {
-						exitL = 1;
-					}
-					if (EXITRIGHT) {
-						exitF = 1;
-					}
-					if (EXITDOWN) {
-						exitR = 1;
-					}
-					break;
-				case 2: // facing down
-					if (WALLRIGHT) {
-						wallL = 1;
-					}
-					if (WALLDOWN) {
-						wallF = 1;
-					}
-					if (WALLLEFT) {
-						wallR = 1;
-					}
-					if (WALLUP) {
-						wallB = 1;
-					}
-					if (EXITRIGHT) {
-						exitL = 1;
-					}
-					if (EXITDOWN) {
-						exitF = 1;
-					}
-					if (EXITLEFT) {
-						exitR = 1;
-					}
-					break;
-				case 3: // facing left
-					if (WALLDOWN) {
-						wallL = 1;
-					}
-					if (WALLLEFT) {
-						wallF = 1;
-					}
-					if (WALLUP) {
-						wallR = 1;
-					}
-					if (WALLRIGHT) {
-						wallB = 1;
-					}
-					if (EXITDOWN) {
-						exitL = 1;
-					}
-					if (EXITLEFT) {
-						exitF = 1;
-					}
-					if (EXITUP) {
-						exitR = 1;
-					}
-					break;
+void _findWalls () {
+	switch (rotation) {
+		case 0: // facing up
+			if (WALLLEFT) {
+				wallL = 1;
+			}
+			if (WALLUP) {
+				wallF = 1;
+			}
+			if (WALLRIGHT) {
+				wallR = 1;
+			}
+			if (WALLDOWN) {
+				wallB = 1;
+			}
+			if (EXITLEFT) {
+				exitL = 1;
+			}
+			if (EXITUP) {
+				exitF = 1;
+			}
+			if (EXITRIGHT) {
+				exitR = 1;
 			}
 			break;
-		case 1:
-			switch (rotation) {
-				case 0: // facing up
-					if (WALLLEFT) {
-						wallFL = 1;
-					}
-					if (WALLRIGHT) {
-						wallFR = 1;
-					}
-					break;
-				case 1: // facing right
-					if (WALLUP) {
-						wallFL = 1;
-					}
-					if (WALLDOWN) {
-						wallFR = 1;
-					}
-					break;
-				case 2: // facing down
-					if (WALLRIGHT) {
-						wallFL = 1;
-					}
-					if (WALLLEFT) {
-						wallFR = 1;
-					}
-					break;
-				case 3: // facing left
-					if (WALLDOWN) {
-						wallFL = 1;
-					}
-					if (WALLUP) {
-						wallFR = 1;
-					}
-					break;
+		case 1: // facing right
+			if (WALLUP) {
+				wallL = 1;
+			}
+			if (WALLRIGHT) {
+				wallF = 1;
+			}
+			if (WALLDOWN) {
+				wallR = 1;
+			}
+			if (WALLLEFT) {
+				wallB = 1;
+			}
+			if (EXITUP) {
+				exitL = 1;
+			}
+			if (EXITRIGHT) {
+				exitF = 1;
+			}
+			if (EXITDOWN) {
+				exitR = 1;
 			}
 			break;
-		default:
+		case 2: // facing down
+			if (WALLRIGHT) {
+				wallL = 1;
+			}
+			if (WALLDOWN) {
+				wallF = 1;
+			}
+			if (WALLLEFT) {
+				wallR = 1;
+			}
+			if (WALLUP) {
+				wallB = 1;
+			}
+			if (EXITRIGHT) {
+				exitL = 1;
+			}
+			if (EXITDOWN) {
+				exitF = 1;
+			}
+			if (EXITLEFT) {
+				exitR = 1;
+			}
+			break;
+		case 3: // facing left
+			if (WALLDOWN) {
+				wallL = 1;
+			}
+			if (WALLLEFT) {
+				wallF = 1;
+			}
+			if (WALLUP) {
+				wallR = 1;
+			}
+			if (WALLRIGHT) {
+				wallB = 1;
+			}
+			if (EXITDOWN) {
+				exitL = 1;
+			}
+			if (EXITLEFT) {
+				exitF = 1;
+			}
+			if (EXITUP) {
+				exitR = 1;
+			}
 			break;
 	}
-	
-	if (iter == 0) {
-		advance(1);
-		_findWalls(++iter);
-	}
-	posx = oldposx;
-	posy = oldposy;
 }
 void findWalls (void) {
 	wallL = wallF = wallR = wallB = 0;
-	wallFL = wallFR = 0;
 	exitL = exitF = exitR = 0;
-	_findWalls(0);
+	_findWalls();
 }
 
 void handleWinch (int signal) {
