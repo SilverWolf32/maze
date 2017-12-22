@@ -343,7 +343,7 @@ void handleWinch (int signal) {
 }
 
 void _drawWalls (int iter, int horizIter) {
-	move(0+iter, 0);
+	// move(0+iter, 0);
 	// printw("[%d %d]", posx, posy);
 	
 	int inset = lines/10;
@@ -352,6 +352,46 @@ void _drawWalls (int iter, int horizIter) {
 	int oldposx = posx, oldposy = posy;
 	// bool oldWallL = wallL, oldWallF = wallF, oldWallR = wallR;
 	
+	// move(lines-1-iter, 0);
+	// for (int i = 0; i < iter; i++) {
+	// printw("  ");
+	// }
+	// printw("Handled walls at %d %d [%s%s%s]", posx, posy, ((wallL)?"L":" "), ((wallF)?"F":" "), ((wallR)?"R":" "));
+	// printw(" offset: %d", horizOffset);
+	// printw("                    ");
+	
+	refresh();
+	
+	findWalls();
+	
+	if (!wallF && !exitF && recursinset < (lines/2)) {
+		// recursinset += inset;
+		advance(0);
+		_drawWalls(iter+1, horizIter);
+	}
+	posx = oldposx;
+	posy = oldposy;
+	findWalls();
+	if (!wallL && !exitL && horizIter <= 0) {
+		// advance(0);
+		moveLeft(0);
+		// printw(" - recursing < to %d %d", posx, posy);
+		_drawWalls(iter, horizIter-1);
+	}
+	posx = oldposx;
+	posy = oldposy;
+	findWalls();
+	if (!wallR && !exitR && horizIter >= 0) {
+		// advance(0);
+		moveRight(0);
+		// printw(" - recursing > to %d %d", posx, posy);
+		_drawWalls(iter, horizIter+1);
+	}
+	
+	// start of drawing
+	
+	posx = oldposx;
+	posy = oldposy;
 	findWalls();
 	
 	if (wallL || exitL) {
@@ -379,15 +419,23 @@ void _drawWalls (int iter, int horizIter) {
 			move(y, x);
 			printw("/");
 		}
-		if (exitL) {
-			for (int i = 0; i < inset; i++) {
-				for (int j = recursinset+i; j < lines-recursinset-i; j++) {
-					int x = drawOffsetX + recursinset+i + horizOffset;
-					if (x < 0 || x > COLS-1) {
-						break;
-					}
-					move(drawOffsetY + j, x);
+		// fill
+		for (int i = 0; i < drawOffsetX + inset; i++) {
+			int j = recursinset;
+			if (i >= drawOffsetX-1) {
+				j += i - drawOffsetX + 1;
+			}
+			int end = lines-j;
+			for (; j < end; j++) {
+				int x = recursinset+i + horizOffset;
+				if (x < 0 || x > COLS-1) {
+					break;
+				}
+				move(drawOffsetY + j, x);
+				if (exitL) {
 					printw("|");
+				} else {
+					printw(" ");
 				}
 			}
 		}
@@ -427,15 +475,25 @@ void _drawWalls (int iter, int horizIter) {
 			move(y, x);
 			printw("\\");
 		}
-		if (exitR) {
-			for (int i = 0; i < inset; i++) {
-				for (int j = recursinset+i; j < lines-recursinset-i; j++) {
-					int x = drawOffsetX + cols-1-recursinset-i + horizOffset;
-					if (x < 0 || x > COLS-1) {
-						break;
-					}
-					move(drawOffsetY + j, x);
+		// fill
+		for (int i = 0; i < drawOffsetX + inset; i++) {
+			int j = recursinset;
+			if (i >= drawOffsetX-1) {
+				j += i - drawOffsetX + 1;
+			}
+			int end = lines-j;
+			for (; j < end; j++) {
+				int x = recursinset+i;
+				x = COLS - x - 1;
+				x += horizOffset;
+				if (x < 0 || x > COLS-1) {
+					break;
+				}
+				move(drawOffsetY + j, x);
+				if (exitR) {
 					printw("|");
+				} else {
+					printw(" ");
 				}
 			}
 		}
@@ -478,22 +536,23 @@ void _drawWalls (int iter, int horizIter) {
 		// move(i, cols-1-recursinset-inset);
 		// printw("|");
 		// }
-		if (exitF) {
-			for (int i = istart; i < iend; i++) {
-				for (int j = recursinset+inset+1; j < lines-1-recursinset-inset; j++) {
-					int x = drawOffsetX + i + horizOffset;
-					if (x < 0 || x > COLS-1) {
-						continue;
-					}
-					move(drawOffsetY + j, x);
+		// fill
+		for (int i = istart; i < iend; i++) {
+			for (int j = recursinset+inset+1; j < lines-1-recursinset-inset; j++) {
+				int x = drawOffsetX + i + horizOffset;
+				if (x < 0 || x > COLS-1) {
+					continue;
+				}
+				move(drawOffsetY + j, x);
+				if (exitF) {
 					printw("|");
+				} else {
+					printw(" ");
 				}
 			}
-			wallF = 1;
 		}
+		wallF = 1;
 	}
-	
-	// break;
 	
 	// end of drawing
 	
@@ -501,50 +560,6 @@ void _drawWalls (int iter, int horizIter) {
 	posy = oldposy;
 	findWalls();
 	
-	move(lines-1-iter, 0);
-	for (int i = 0; i < iter; i++) {
-		printw("  ");
-	}
-	printw("Handled walls at %d %d [%s%s%s]", posx, posy, ((wallL)?"L":" "), ((wallF)?"F":" "), ((wallR)?"R":" "));
-	printw(" offset: %d", horizOffset);
-	printw("                    ");
-	
-	refresh();
-	
-	if (!wallL && !exitL && horizIter <= 0 && iter == 0) {
-		// advance(0);
-		moveLeft(0);
-		printw(" - recursing < to %d %d", posx, posy);
-		_drawWalls(iter, horizIter-1);
-	}
-	posx = oldposx;
-	posy = oldposy;
-	findWalls();
-	if (!wallR && !exitR && horizIter >= 0 && iter == 0) {
-		// advance(0);
-		moveRight(0);
-		printw(" - recursing > to %d %d", posx, posy);
-		_drawWalls(iter, horizIter+1);
-	}
-	posx = oldposx;
-	posy = oldposy;
-	findWalls();
-	if (!wallF && recursinset < (lines/2)) {
-		// recursinset += inset;
-		advance(1);
-		_drawWalls(iter+1, horizIter);
-	}
-	
-	posx = oldposx;
-	posy = oldposy;
-	// move(lines-1, cols-8);
-	// printw("%d %d", posx, posy);
-	findWalls();
-	// move(0+iter, 0);
-	// for (int i = 0; i < iter; i++) {
-	// printw("  ");
-	// }
-	// printw("Returned to %d %d, %s%s%s", posx, posy, ((wallL)?"L":""), ((wallF)?"F":""), ((wallR)?"R":""));
 	refresh();
 }
 void drawWalls (void) {
