@@ -798,9 +798,39 @@ int main (int argc, char **argv) {
 		int c = wgetch(stdscr);
 		flushinp(); // discard typeahead, prevents holding `?' from locking up program
 		switch (c) {
-			case 'q':
-				endwin();
-				return 0;
+			case 'q': // quit
+				;
+				char *s1 = "Quit?";
+				char *s2 = " [Press Return to quit, Esc to cancel] ";
+				int msgwidth = strlen(s2);
+				move(LINES/2 - 2, COLS/2 - msgwidth/2);
+				int i;
+				for (i = 0; i < msgwidth; i++) {
+					printw(" ");
+				}
+				move(LINES/2 - 1, COLS/2 - msgwidth/2);
+				for (i = 0; i < msgwidth; i++) {
+					printw(" ");
+				}
+				move(LINES/2 - 1, COLS/2 - strlen(s1)/2);
+				printw(s1);
+				move(LINES/2, COLS/2 - msgwidth/2);
+				printw(s2);
+				move(LINES/2 + 1, COLS/2 - msgwidth/2);
+				for (i = 0; i < msgwidth; i++) {
+					printw(" ");
+				}
+				
+				{
+					int c2;
+					while ((c2 = wgetch(stdscr)) != '\r' && c2 != '\e' && c2 != ERR) {
+						;
+					}
+					if (c2 == '\r') {
+						endwin();
+						return 0;
+					}
+				}
 				break;
 			case 'a': // rotate left
 				rotation--;
