@@ -26,6 +26,9 @@ char *maze = NULL;
 // in drawing, don't look at more than this many cells
 #define VIEWDEPTH 128
 
+// no fancy arrows
+#define ASCII
+
 #define WALLUP (posy <= 0 || maze[(posy-1)*(mazeWidth+1)+posx] != ' ')
 #define WALLDOWN (posy >= mazeHeight-1 || maze[(posy+1)*(mazeWidth+1)+posx] != ' ')
 #define WALLLEFT (posx <= 0 || maze[(posy*(mazeWidth+1)+posx)-1] != ' ')
@@ -734,6 +737,61 @@ int main (int argc, char **argv) {
 			// printw("%s", maze);
 			refresh();
 		} */
+
+		// show compass
+		if (showCompass) {
+			switch (rotation) {
+#ifdef ASCII
+				case 0: // up
+					move(0, 1);
+					printw("^");
+					move(1, 1);
+					printw("|");
+					break;
+				case 1:
+					move(1, 1);
+					printw("->");
+					break;
+				case 2:
+					move(1, 1);
+					printw("|");
+					move(2, 1);
+					printw("V");
+					break;
+				case 3:
+					move(1, 0);
+					printw("<-");
+					break;
+#else
+				case 0: // up
+					move(0, 1);
+					printw("▲");
+					move(1, 1);
+					printw("│");
+					break;
+				case 1:
+					move(1, 1);
+					printw("─▶︎");
+					break;
+				case 2:
+					move(1, 1);
+					printw("│");
+					move(2, 1);
+					printw("▼");
+					break;
+				case 3:
+					move(1, 0);
+					printw("◀︎─");
+					break;
+#endif
+				default: // should never happen!
+					endwin();
+					fprintf(stderr, "maze: error: invalid rotation %d (should never happen)\n", rotation);
+					exit(2);
+					break;
+			}
+			refresh();
+		}
 		
 		int absPos = posy*(mazeWidth+1) + posx;
 		if (absPos == exitpos) {
@@ -793,6 +851,9 @@ int main (int argc, char **argv) {
 				break;
 			case 's':
 				retreat(0);
+				break;
+			case 'C':
+				showCompass = !showCompass;
 				break;
 			case '?':
 				// print maze
