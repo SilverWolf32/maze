@@ -492,7 +492,7 @@ void _drawWalls (int iter, int horizIter, int ptList[][2]) {
 			printw("\\");
 		}
 		// fill
-		for (int i = 0; i < drawOffsetX + inset; i++) {
+		for (int i = 0; i < drawOffsetX + inset + 1; i++) {
 			int j = recursinset;
 			if (i >= drawOffsetX-1) {
 				j += i - drawOffsetX + 1;
