@@ -1,6 +1,6 @@
 PROGRAM=maze
 CC=gcc
-CFLAGS=-g -pthread
+CFLAGS=-g -pthread -Wall
 LD=gcc
 LFLAGS=-lncurses -pthread -lm
 objects=curses.o
